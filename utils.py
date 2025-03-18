@@ -42,5 +42,25 @@ def performanceDistributioninIQRbyGender(dataframe, column):
     plt.show()
     return iqr_performance, grouped_performance_by_gender
 
+def getOverallBestorWorst(dataframe, percentile):
+    columns_having_avg = dataframe.columns.str.contains("AVERAGE_PV")
+    pv_columns = dataframe.columns[columns_having_avg].tolist()
+    for col in pv_columns:
+        if(percentile > 0.10):
+            percentile_val = dataframe[col].quantile(percentile)
+            dataframe = dataframe[dataframe[col] >= percentile_val]
+        else:
+            percentile_val = dataframe[col].quantile(percentile)
+            dataframe = dataframe[dataframe[col] <= percentile_val]
+
+    sns.histplot(data=dataframe, x="Gender_Student",)
+    plt.tight_layout()
+    plt.show()
+    plt.show()
+
+
+    return dataframe
+
+
 
 
