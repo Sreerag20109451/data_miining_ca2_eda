@@ -61,6 +61,38 @@ def getOverallBestorWorst(dataframe, percentile):
 
     return dataframe
 
+def getDisorderlyBehaviourPerGender(dataframe, topic, behaviour):
+    filtered = dataframe[dataframe[f"Disorderly_Behavior_during_{topic}_Lessons"].str.contains(behaviour)]
+    grouped = filtered.groupby("Gender_Student", observed=False)["Gender_Student"]
+    fig, ax = plt.subplots(1, 2, figsize=(10, 6))
+    sns.histplot(data=filtered, x="Gender_Student", y=f"Disorderly_Behavior_during_{topic}_Lessons", ax=ax[0])
+    ax[0].set_xlabel("Gender")
+    sns.countplot(data=filtered, x="Gender_Student", color="b", ax=ax[1])
+    ax[1].set_xlabel("Gender")
+    plt.tight_layout()
+    plt.show()
+    return filtered  , grouped
+
+
+def subjectLikeness(dataframe, topic, behaviour):
+    filtered = dataframe[dataframe[f"Students_Like_Learning_{topic}"].str.contains(behaviour)]
+    grouped = filtered.groupby("Gender_Student", observed=False)["Gender_Student"]
+    fig, ax = plt.subplots(1, 2, figsize=(10, 6))
+    sns.histplot(data=filtered, x="Gender_Student", y=f"Students_Like_Learning_{topic}", ax=ax[0])
+    ax[0].set_xlabel("Gender")
+    sns.countplot(data=filtered, x="Gender_Student", color="b", ax=ax[1])
+    ax[1].set_xlabel("Gender")
+    plt.tight_layout()
+    plt.show()
+    return filtered  , grouped
+
+
+def getPercentageByGender(dataframe, ref_dataframe, gender):
+    perc_g = dataframe[dataframe["Gender_Student"].str.contains(gender)]["Gender_Student"].count() / \
+                ref_dataframe[ref_dataframe["Gender_Student"].str.contains(gender)]["Gender_Student"].count()
+    print(perc_g)
+
+
 
 
 
