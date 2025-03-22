@@ -37,6 +37,9 @@ def getPercentageFromReferCol(dataframe,refer_datafreame,col):
 
 
 def originOfParents(dataframe):
+
+    dataframe = dataframe.dropna(dataframe["ParentA_Born_Country"].str.contains("NA", na=False) |
+                  dataframe["ParentB_Born_Country"].str.contains("NA", na=False))
     all_native = (dataframe["ParentA_Born_Country"].str.contains("Native", na=False) &
                   dataframe["ParentB_Born_Country"].str.contains("Native", na=False))
 
