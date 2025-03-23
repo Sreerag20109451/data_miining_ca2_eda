@@ -4,6 +4,7 @@ import seaborn as sns
 from fontTools.misc.cython import returns
 from soupsieve.util import lower
 import pandas as pd
+import  scipy.stats as stats
 
 
 def getrelatedFields(dataframe, substring):
@@ -147,19 +148,30 @@ def getPercentageFromReferCol(dataframe,refer_datafreame,col):
 
 
 def originOfParents(dataframe):
+    # Default category: "NA"
+    dataframe["Parental_Origin"] = "NA"
 
-    dataframe = dataframe.dropna(dataframe["ParentA_Born_Country"].str.contains("NA", na=False) |
-                  dataframe["ParentB_Born_Country"].str.contains("NA", na=False))
+    # Define conditions
     all_native = (dataframe["ParentA_Born_Country"].str.contains("Native", na=False) &
                   dataframe["ParentB_Born_Country"].str.contains("Native", na=False))
 
     all_foreign = (dataframe["ParentA_Born_Country"].str.contains("Foreign", na=False) &
                    dataframe["ParentB_Born_Country"].str.contains("Foreign", na=False))
-    dataframe["Parental_Origin"] = "Atleast Foreign"
+
+    at_least_one_foreign = ((dataframe["ParentA_Born_Country"].str.contains("Foreign", na=False) |
+                             dataframe["ParentB_Born_Country"].str.contains("Foreign", na=False)) &
+                            ~all_foreign)  # Ensure it's not already categorized as "All Foreign"
+
+    # Assign categories
     dataframe.loc[all_native, "Parental_Origin"] = "All Native"
     dataframe.loc[all_foreign, "Parental_Origin"] = "All Foreign"
+    dataframe.loc[at_least_one_foreign, "Parental_Origin"] = "At least One"
 
     return dataframe
+
+
+
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 from soupsieve.util import lower
@@ -229,8 +241,10 @@ def getDisorderlyBehaviourPerGender(dataframe, topic, behaviour):
     fig, ax = plt.subplots(1, 2, figsize=(10, 6))
     sns.histplot(data=filtered, x="Gender_Student", y=f"Disorderly_Behavior_during_{topic}_Lessons", ax=ax[0])
     ax[0].set_xlabel("Gender")
+    ax[0].set_title(f"Gender and Disorderly Behaviour during {topic} classes")
     sns.countplot(data=filtered, x="Gender_Student", color="b", ax=ax[1])
     ax[1].set_xlabel("Gender")
+    ax[1].set_title(f"Gender and Disorderly Behaviour during {topic} classes")
     plt.tight_layout()
     plt.show()
     return filtered  , grouped
@@ -363,4 +377,11 @@ def getPercentageOfSenseOfBelonging(dataframe, conditionstr, columnToGroup):
     return  grouped_percentage , percentageFromTotal
 
 
+def chisquqared(dataframe,col1,col2):
+    contingency_table = pd.crosstab(dataframe[col1], dataframe[col2])
 
+    # Perform chi-square test
+    chi2, p, dof, expected = stats.chi2_contingency(contingency_table)
+
+    print(f"Chi-square statistic of {col1}: {chi2}")
+    print(f"P-value of {col1}: {p}")
